@@ -44,7 +44,7 @@ func Child(command []string) {
 	fmt.Printf("Running child %v as pid %d\n", command, os.Getpid())
 
 	// set hostname in UTS namespace
-	if err := namespace.SetHostname("mycontainer"); err != nil {
+	if err := namespace.SetHostname("container_nhom3"); err != nil {
 		fmt.Fprintf(os.Stderr, "sethostname error: %v\n", err)
 		// continue anyway
 	}
