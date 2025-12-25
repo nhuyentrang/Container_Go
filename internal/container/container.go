@@ -15,9 +15,9 @@ import (
 const defaultRootfs = "./rootfs"
 
 type runOptions struct {
-	rootfs  string
-	limits  cgroups.Limits
-	memStr  string // giữ chuỗi mem để truyền xuống child (debug/inspect)
+	rootfs string
+	limits cgroups.Limits
+	memStr string // giữ chuỗi mem để truyền xuống child (debug/inspect)
 }
 
 // parseRunArgs: parse flags cho `run`, trả về options và command còn lại.
@@ -103,11 +103,13 @@ func Run(args []string) {
 	}
 
 	// ✅ Start (không dùng Run) để lấy PID host của child => dùng cho cgroups
+
 	if err := cmd.Start(); err != nil {
-		fmt.Printf("Container host PID: %d\n", cmd.Process.Pid)
 		fmt.Fprintf(os.Stderr, "start error: %v\n", err)
 		os.Exit(1)
 	}
+	fmt.Printf("Container child host PID: %d\n", cmd.Process.Pid)
+	fmt.Printf("Container host PID: %d\n", cmd.Process.Pid)
 
 	// ✅ tạo cgroup và apply limit vào PID host của child
 	containerID := fmt.Sprintf("pid-%d", cmd.Process.Pid)

@@ -97,7 +97,7 @@ func (m *Manager) Apply(pid int, lim Limits) error {
 	if err := add(m.PidsPath); err != nil {
 		return fmt.Errorf("add pid to pids cgroup: %w", err)
 	}
-	return nil	
+	return nil
 }
 
 func writeFile(path, val string) error {

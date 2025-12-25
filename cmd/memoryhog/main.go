@@ -8,7 +8,7 @@ import (
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Println("usage: memhog <MB>")
+		fmt.Println("usage: memoryhog <MB>")
 		os.Exit(1)
 	}
 
@@ -20,13 +20,14 @@ func main() {
 	size := mb * 1024 * 1024
 	buf := make([]byte, size)
 
-	// chạm vào từng page để kernel thực sự cấp RAM
+	// touch mỗi page 4KB để kernel thật sự cấp RAM
 	for i := 0; i < len(buf); i += 4096 {
 		buf[i] = 1
 	}
 
-	fmt.Printf("memhog: allocated %d MB successfully\n", mb)
-	fmt.Println("sleeping...")
-
+	fmt.Printf("memhog: allocated %d MB successfully (touched pages)\n", mb)
+	fmt.Println("sleeping 30s...")
 	time.Sleep(30 * time.Second)
+
+	_ = buf[0]
 }
