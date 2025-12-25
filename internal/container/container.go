@@ -81,13 +81,13 @@ func Run(args []string) {
 
 	fmt.Printf("Running %v as pid %d\n", args, os.Getpid())
 
-	// ✅ chuẩn bị rootfs tối thiểu (busybox + /bin/sh)
+	// chuẩn bị rootfs tối thiểu (busybox + /bin/sh)
 	if err := rootfs.PrepareBusyboxRootfs(opt.rootfs); err != nil {
 		fmt.Fprintf(os.Stderr, "prepare rootfs error: %v\n", err)
 		os.Exit(1)
 	}
 
-	// ✅ Truyền nguyên args xuống child để child parse y hệt (rootfs/mem/cpu/pids + command)
+	// Truyền nguyên args xuống child để child parse y hệt (rootfs/mem/cpu/pids + command)
 	// Lưu ý: args ở đây là phần sau "run" (đúng như main.go đang gọi container.Run(os.Args[2:]))
 	childArgs := append([]string{"child"}, args...)
 
@@ -96,13 +96,38 @@ func Run(args []string) {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
+	// cmd.SysProcAttr = &syscall.SysProcAttr{
+	// 	Cloneflags: syscall.CLONE_NEWUTS |
+	// 		syscall.CLONE_NEWPID |
+	// 		syscall.CLONE_NEWNS,
+	// }
+
 	cmd.SysProcAttr = &syscall.SysProcAttr{
 		Cloneflags: syscall.CLONE_NEWUTS |
 			syscall.CLONE_NEWPID |
-			syscall.CLONE_NEWNS,
+			syscall.CLONE_NEWNS |
+			syscall.CLONE_NEWUSER,
+
+		UidMappings: []syscall.SysProcIDMap{
+			{
+				ContainerID: 0,
+				HostID:      os.Getuid(),
+				Size:        1,
+			},
+		},
+
+		GidMappings: []syscall.SysProcIDMap{
+			{
+				ContainerID: 0,
+				HostID:      os.Getgid(),
+				Size:        1,
+			},
+		},
+
+		GidMappingsEnableSetgroups: false,
 	}
 
-	// ✅ Start (không dùng Run) để lấy PID host của child => dùng cho cgroups
+	// Start để lấy PID host của child => dùng cho cgroups
 
 	if err := cmd.Start(); err != nil {
 		fmt.Fprintf(os.Stderr, "start error: %v\n", err)
@@ -111,7 +136,7 @@ func Run(args []string) {
 	fmt.Printf("Container child host PID: %d\n", cmd.Process.Pid)
 	fmt.Printf("Container host PID: %d\n", cmd.Process.Pid)
 
-	// ✅ tạo cgroup và apply limit vào PID host của child
+	// tạo cgroup và apply limit vào PID host của child
 	containerID := fmt.Sprintf("pid-%d", cmd.Process.Pid)
 	mgr, err := cgroups.NewManager(containerID)
 	if err != nil {
