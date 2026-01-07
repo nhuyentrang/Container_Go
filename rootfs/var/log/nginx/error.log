@@ -1,0 +1,4 @@
+2025/12/25 06:18:26 [emerg] 7#7: getpwnam("www-data") failed (2: No such file or directory) in /etc/nginx/nginx.conf:3
+2025/12/25 06:22:44 [emerg] 8#8: open() "/etc/nginx/modules-enabled/50-mod-http-geoip2.conf" failed (2: No such file or directory) in /etc/nginx/nginx.conf:6
+2025/12/25 06:26:10 [emerg] 7#7: mkdir() "/var/lib/nginx/body" failed (2: No such file or directory)
+2026/01/07 17:15:07 [emerg] 8#8: mkdir() "/var/lib/nginx/body" failed (2: No such file or directory)
